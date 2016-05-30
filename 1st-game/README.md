@@ -1,4 +1,4 @@
-# Juego 1
+# Golden Balls
 
 ## Desarrollo
 
