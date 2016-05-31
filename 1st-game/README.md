@@ -50,4 +50,5 @@ Y empieza a jugar ;)
 ## TODO
 
 - Documentar: ¿Cómo jugar?
+- Hacerlo bonito :P
 

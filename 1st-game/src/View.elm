@@ -3,7 +3,7 @@ module View exposing ( view )
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
 
-import Types exposing ( Model, Msg(..) )
+import Types exposing (..)
 
 view : Model -> Html Msg
 view model =
@@ -15,7 +15,7 @@ view model =
 yourChoose : Html Msg
 yourChoose =
   div []
-    [ button [ onClick Steal ] [ text "Steal" ]
-    , button [ onClick Still ] [ text "Still" ]
+    [ button [ onClick (PlayUser Steal) ] [ text "Steal" ]
+    , button [ onClick (PlayUser Still) ] [ text "Still" ]
     ]
 
