@@ -1,27 +1,104 @@
-import Html.App as Html
+import Html            exposing (Html, br, button, div, text, p)
+import Html.App        exposing (program)
+import Html.Events     exposing (onClick)
+import Html.Attributes exposing (disabled)
 
-import Html.App as Html
-import Html exposing (..)
-import Html.Events exposing (..)
-import Update exposing (update)
-import View exposing (view)
-import Types exposing
-  ( Model
-  , Msg(..)
-  , Option(..)
-  )
+import Task         exposing (Task)
+import Random       exposing (float, bool, generate, map)
+import Process
+
+type alias Model =
+  { msg : String
+  , disabled : Bool
+  , yourFace : String
+  , yourOpntFace : String
+  }
+
+type Option = Steal | Still
+type Msg    = Play Option
+            | CalcDelayCount Option Float
+            | Delay Option
+            | Fight Option Option
+            | Restart
+
+normalFace : String
+normalFace = ":¬|"
+
+sadFace : String
+sadFace = ":'("
+
+coolFace : String
+coolFace = "B)"
+
+happyFace : String
+happyFace = ":)"
+
+-- MAIN
 
 main =
-  Html.program
-    { init = (Model "Let's Start!", Cmd.none)
-    , view = view
+  program
+    { init = (initModel, Cmd.none)
+    , view   = view
     , update = update
-    , subscriptions = subscriptions
+    , subscriptions = always Sub.none
     }
 
--- SUBSCRIPTIONS
+initModel : Model
+initModel =
+  { msg = "Lets start!"
+  , disabled = False
+  , yourFace = normalFace
+  , yourOpntFace = normalFace
+  }
 
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-  Sub.none
+-- UPDATE
 
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+    case msg of
+        Play userOpt ->
+            Model "..." True normalFace normalFace ! [ generate (CalcDelayCount userOpt) (float 250 2500) ]
+
+        CalcDelayCount option time ->
+            model ! [ sleep time (Delay option) ]
+
+        Delay option ->
+            model ! [ generate (Fight option) optionGenerator ]
+
+        Fight option option2 ->
+          let
+            (result, myFace, myOpntFace) = getResult option option2
+          in
+            Model result True myFace myOpntFace ! [ sleep 2500 Restart ]
+
+        Restart ->
+            Model "Start!" False normalFace normalFace ! []
+
+optionGenerator : Random.Generator Option
+optionGenerator =
+    map (\b -> if b then Steal else Still) bool
+
+getResult : Option -> Option -> (String, String, String)
+getResult option option2 =
+    case (option, option2) of
+        (Steal, Steal) -> ("Both lose!", sadFace, sadFace)
+        (Steal, Still) -> ("You win. He lose!", coolFace, sadFace)
+        (Still, Steal) -> ("You lose. He wins!", sadFace, coolFace)
+        (Still, Still) -> ("Both win a little", happyFace, happyFace)
+
+sleep : Float -> Msg -> Cmd Msg
+sleep time msg =
+    Task.perform (always msg) (always msg) (Process.sleep time)
+
+-- VIEW
+
+view : Model -> Html Msg
+view model =
+    div []
+        [ p [] [ text "You:", br [] [], text model.yourFace ]
+        , text model.msg
+        , p [] [ text "Your opponent:", br [] [], text model.yourOpntFace ]
+        , br [] []
+        , button [ onClick (Play Steal), disabled model.disabled ] [ text "Steal" ]
+        , button [ onClick (Play Still), disabled model.disabled ] [ text "Still" ]
+        ]
