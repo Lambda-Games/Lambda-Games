@@ -7,6 +7,8 @@ import Task         exposing (Task)
 import Random       exposing (float, bool, generate, map)
 import Process
 
+-- MODEL
+
 type alias Model =
   { msg : String
   , disabled : Bool
@@ -14,12 +16,22 @@ type alias Model =
   , yourOpntFace : String
   }
 
-type Option = Steal | Still
-type Msg    = Play Option
-            | CalcDelayCount Option Float
-            | Delay Option
-            | Fight Option Option
-            | Restart
+type Option
+  = Steal
+  | Still
+
+type Msg
+  = Play Option
+  | CalcDelayCount Option Float
+  | Delay Option
+  | Fight Option Option
+  | Restart
+
+type alias Result =
+  { resultMsg : String
+  , resultYourFace : String
+  , resultYourOpntFace : String
+  }
 
 normalFace : String
 normalFace = ":¬|"
@@ -67,9 +79,9 @@ update msg model =
 
         Fight option option2 ->
           let
-            (result, myFace, myOpntFace) = getResult option option2
+            result = getResult option option2
           in
-            Model result True myFace myOpntFace ! [ sleep 2500 Restart ]
+            Model result.resultMsg True result.resultYourFace result.resultYourOpntFace ! [ sleep 2500 Restart ]
 
         Restart ->
             Model "Start!" False normalFace normalFace ! []
@@ -78,13 +90,13 @@ optionGenerator : Random.Generator Option
 optionGenerator =
     map (\b -> if b then Steal else Still) bool
 
-getResult : Option -> Option -> (String, String, String)
+getResult : Option -> Option -> Result
 getResult option option2 =
     case (option, option2) of
-        (Steal, Steal) -> ("Both lose!", sadFace, sadFace)
-        (Steal, Still) -> ("You win. He lose!", coolFace, sadFace)
-        (Still, Steal) -> ("You lose. He wins!", sadFace, coolFace)
-        (Still, Still) -> ("Both win a little", happyFace, happyFace)
+        (Steal, Steal) -> Result "Both lose!" sadFace sadFace
+        (Steal, Still) -> Result "You win. He lose!" coolFace sadFace
+        (Still, Steal) -> Result "You lose. He wins!" sadFace coolFace
+        (Still, Still) -> Result "Both win a little" happyFace happyFace
 
 sleep : Float -> Msg -> Cmd Msg
 sleep time msg =
