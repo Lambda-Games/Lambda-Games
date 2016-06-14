@@ -1,10 +1,10 @@
-import Html            exposing (Html, br, button, div, text, p)
-import Html.App        exposing (program)
-import Html.Events     exposing (onClick)
-import Html.Attributes exposing (disabled)
+import Html exposing (Html, br, button, div, text, p, img)
+import Html.App exposing (program)
+import Html.Events exposing (onClick)
+import Html.Attributes exposing (disabled, src)
 
-import Task         exposing (Task)
-import Random       exposing (float, bool, generate, map)
+import Task exposing (Task)
+import Random exposing (float, bool, generate, map)
 import Process
 
 -- MODEL
@@ -34,16 +34,16 @@ type alias Result =
   }
 
 normalFace : String
-normalFace = ":¬|"
+normalFace = "img/normal.png"
 
 sadFace : String
-sadFace = ":'("
+sadFace = "img/sad.png"
 
 coolFace : String
-coolFace = "B)"
+coolFace = "img/happy.png"
 
 happyFace : String
-happyFace = ":)"
+happyFace = "img/normal_happy.png"
 
 -- MAIN
 
@@ -106,11 +106,35 @@ sleep time msg =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ p [] [ text "You:", br [] [], text model.yourFace ]
-        , text model.msg
-        , p [] [ text "Your opponent:", br [] [], text model.yourOpntFace ]
-        , br [] []
-        , button [ onClick (Play Steal), disabled model.disabled ] [ text "Steal" ]
-        , button [ onClick (Play Still), disabled model.disabled ] [ text "Still" ]
+  div []
+      [ resultsHtml model
+      , buttonsHtml model
+      ]
+
+simpleImg : String -> Html a
+simpleImg srcImg =
+  img [ src srcImg ] []
+
+
+resultsHtml : Model -> Html a
+resultsHtml model =
+  div []
+        [ playerHtml "You:" model.yourFace
+        , p [] [ text model.msg ]
+        , playerHtml "Your Opponent:" model.yourOpntFace
         ]
+
+playerHtml : String -> String -> Html a
+playerHtml name face =
+  div []
+      [ p [] [ text name ]
+      , simpleImg face
+      ]
+
+buttonsHtml : Model -> Html Msg
+buttonsHtml model =
+  div []
+      [ button [ onClick (Play Steal), disabled model.disabled ] [ text "Steal" ]
+      , button [ onClick (Play Still), disabled model.disabled ] [ text "Still" ]
+      ]
+
