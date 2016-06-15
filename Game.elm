@@ -15,8 +15,7 @@ main =
 
 gameLinks : List Link
 gameLinks =
-  [ { link = "#", text_ = "LOL" }
-  , { link = "#1", text_ = "LOL1" }
+  [ { link = "./1st-game/index.html", text_ = "Golden Balls" }
   ]
 
 title : Html a
